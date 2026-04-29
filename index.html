@@ -9,67 +9,22 @@
 
 <body style="margin:0; overflow:hidden;">
 
-<a-scene arjs="sourceType: webcam;">
+<a-scene
+  vr-mode-ui="enabled: false"
+  embedded
+  renderer="logarithmicDepthBuffer: true;"
+  arjs="sourceType: webcam; debugUIEnabled: false;"
+>
 
   <a-camera gps-camera rotation-reader></a-camera>
 
   <a-box
-    id="bomb"
     gps-entity-place="latitude: 35.7100; longitude: 139.8107;"
     color="red"
     scale="5 5 5"
-    visible="false"
   ></a-box>
 
 </a-scene>
-
-<script>
-let bomb;
-let visible = false;
-
-window.onload = () => {
-  bomb = document.querySelector("#bomb");
-
-  navigator.geolocation.watchPosition((pos) => {
-    const userLat = pos.coords.latitude;
-    const userLng = pos.coords.longitude;
-
-    const bombLat = 35.7100;
-    const bombLng = 139.8107;
-
-    const dist = getDistance(userLat, userLng, bombLat, bombLng);
-
-    console.log("距離:", dist);
-
-    if (dist < 20 && !visible) {
-      bomb.setAttribute("visible", true);
-      visible = true;
-    }
-
-    if (dist >= 20 && visible) {
-      bomb.setAttribute("visible", false);
-      visible = false;
-    }
-
-  });
-};
-
-function getDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI/180;
-  const dLon = (lon2 - lon1) * Math.PI/180;
-
-  const a =
-    Math.sin(dLat/2)*Math.sin(dLat/2) +
-    Math.cos(lat1*Math.PI/180) *
-    Math.cos(lat2*Math.PI/180) *
-    Math.sin(dLon/2)*Math.sin(dLon/2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-  return R * c;
-}
-</script>
 
 </body>
 </html>
