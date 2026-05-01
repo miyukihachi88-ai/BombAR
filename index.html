@@ -1,30 +1,220 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+<meta charset="utf-8">
 
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+<script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 
 <body style="margin:0; overflow:hidden;">
 
+<!-- 距離UI -->
+<div id="distanceUI" style="
+position:absolute;
+top:20px;
+left:20px;
+background:rgba(0,0,0,0.6);
+color:white;
+padding:10px;
+border-radius:10px;
+z-index:10;">
+距離取得中...
+</div>
+
+<!-- ミニマップ -->
+<img src="map.png" style="
+position:absolute;
+top:20px;
+right:20px;
+width:200px;
+height:200px;
+z-index:5;
+">
+
+<canvas id="mapCanvas" width="200" height="200" style="
+position:absolute;
+top:20px;
+right:20px;
+z-index:10;
+"></canvas>
+
+<button id="toggleHint" style="
+position:absolute;
+top:230px;
+right:20px;
+z-index:20;">
+ヒントON
+</button>
+
 <a-scene
-  vr-mode-ui="enabled: false"
-  embedded
-  renderer="logarithmicDepthBuffer: true;"
-  arjs="sourceType: webcam; facingMode: environment; videoTexture: true; debugUIEnabled: false;"
+vr-mode-ui="enabled:false"
+embedded
+arjs="sourceType:webcam; facingMode:environment;"
 >
-
-  <a-camera gps-camera rotation-reader></a-camera>
-
-  <a-box
-    gps-entity-place="latitude: 35.727304515738005; longitude: 139.54134834049455;"
-    color="red"
-    scale="5 5 5"
-  ></a-box>
-
+<a-camera gps-camera rotation-reader></a-camera>
 </a-scene>
 
+<script>
+
+// ===== 爆弾データ =====
+const bombs = [
+  { lat: 35.736582, lng: 139.537972, found: false },
+  { lat: 35.736937, lng: 139.537907, found: false },
+  { lat: 35.737052, lng: 139.537947, found: false },
+  { lat: 35.737248, lng: 139.537907, found: false },
+  { lat: 35.737478, lng: 139.53808, found: false },
+  { lat: 35.737703, lng: 139.5381, found: false },
+  { lat: 35.737934, lng: 139.538061, found: false },
+  { lat: 35.738154, lng: 139.538183, found: false },
+  { lat: 35.738561, lng: 139.538271, found: false },
+  { lat: 35.738789, lng: 139.538292, found: false },
+  { lat: 35.739154, lng: 139.538353, found: false },
+  { lat: 35.739586, lng: 139.538666, found: false },
+  { lat: 35.739867, lng: 139.538581, found: false },
+  { lat: 35.740057, lng: 139.538597, found: false },
+  { lat: 35.740265, lng: 139.538585, found: false },
+  { lat: 35.74047, lng: 139.538701, found: false },
+  { lat: 35.740801, lng: 139.538547, found: false }
+];
+
+let bombEntities = [];
+let showHints = true;
+
+// ===== ミニマップ設定（重要） =====
+// マップ画像の範囲に合わせて調整
+const mapMinLat = 35.73601;
+const mapMaxLat = 35.74145;
+const mapMinLng = 139.53554;
+const mapMaxLng = 139.54017;
+
+const canvas = document.getElementById("mapCanvas");
+const ctx = canvas.getContext("2d");
+
+// ===== ヒント切替 =====
+document.getElementById("toggleHint").onclick = () => {
+  showHints = !showHints;
+  document.getElementById("toggleHint").innerText =
+    showHints ? "ヒントON" : "ヒントOFF";
+};
+
+// ===== 座標変換 =====
+function convert(lat, lng) {
+  const x = (lng - mapMinLng) / (mapMaxLng - mapMinLng) * 200;
+  const y = (mapMaxLat - lat) / (mapMaxLat - mapMinLat) * 200;
+  return { x, y };
+}
+
+// ===== ミニマップ描画 =====
+function drawMap(userLat, userLng) {
+
+  ctx.clearRect(0, 0, 200, 200);
+
+  // 自分（青）
+  const me = convert(userLat, userLng);
+  ctx.fillStyle = "blue";
+  ctx.beginPath();
+  ctx.arc(me.x, me.y, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (!showHints) return;
+
+  // 爆弾
+  bombs.forEach((b, i) => {
+    const pos = convert(b.lat, b.lng);
+    ctx.fillStyle = bombs[i].found ? "gray" : "red";
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+// ===== 初期化 =====
+window.onload = () => {
+  const scene = document.querySelector("a-scene");
+
+  bombs.forEach((b, i) => {
+    const el = document.createElement("a-box");
+
+    el.setAttribute("gps-entity-place", `latitude:${b.lat}; longitude:${b.lng}`);
+    el.setAttribute("color", "red");
+    el.setAttribute("scale", "10 10 10");
+    el.setAttribute("visible", "false");
+
+    el.addEventListener("click", () => {
+      if (!bombs[i].found) {
+        bombs[i].found = true;
+        el.removeAttribute("animation");
+      }
+    });
+
+    scene.appendChild(el);
+    bombEntities.push(el);
+  });
+
+  startGPS();
+};
+
+// ===== GPS =====
+function startGPS() {
+  navigator.geolocation.watchPosition((pos) => {
+
+    const userLat = pos.coords.latitude;
+    const userLng = pos.coords.longitude;
+
+    let nearestDist = Infinity;
+
+    bombs.forEach((b, i) => {
+      const dist = getDistance(userLat, userLng, b.lat, b.lng);
+      const el = bombEntities[i];
+
+      if (!bombs[i].found && dist < nearestDist) {
+        nearestDist = dist;
+      }
+
+      if (dist < 20) {
+        el.setAttribute("visible", true);
+
+        if (!bombs[i].found) {
+          el.setAttribute("animation", {
+            property: "visible",
+            dir: "alternate",
+            dur: 500,
+            loop: true
+          });
+        }
+      } else {
+        el.setAttribute("visible", false);
+      }
+    });
+
+    // 距離表示
+    const ui = document.getElementById("distanceUI");
+    ui.innerText = (nearestDist === Infinity)
+      ? "クリア！"
+      : "あと " + Math.floor(nearestDist) + " m";
+
+    // ミニマップ更新
+    drawMap(userLat, userLng);
+
+  });
+}
+
+// ===== 距離 =====
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(lat1*Math.PI/180) *
+    Math.cos(lat2*Math.PI/180) *
+    Math.sin(dLon/2)**2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+</script>
 </body>
 </html>
