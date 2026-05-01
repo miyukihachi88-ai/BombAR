@@ -22,6 +22,20 @@ z-index:10;">
 距離取得中...
 </div>
 
+<!-- 発見UI -->
+<div id="foundUI" style="
+position:absolute;
+top:80px;
+left:20px;
+background:rgba(255,0,0,0.8);
+color:white;
+padding:10px;
+border-radius:10px;
+display:none;
+z-index:20;">
+発見！
+</div>
+
 <!-- ミニマップ -->
 <img src="map.png" style="
 position:absolute;
@@ -32,7 +46,7 @@ height:200px;
 z-index:5;
 ">
 
-<canvas id="mapCanvas" width="200" height="306" style="
+<canvas id="mapCanvas" width="200" height="200" style="
 position:absolute;
 top:20px;
 right:20px;
@@ -41,7 +55,7 @@ z-index:10;
 
 <button id="toggleHint" style="
 position:absolute;
-top:230px;
+top:340px;
 right:20px;
 z-index:20;">
 ヒントON
@@ -52,6 +66,9 @@ vr-mode-ui="enabled:false"
 embedded
 arjs="sourceType:webcam; facingMode:environment;"
 >
+<a-assets>
+  <a-asset-item id="bombModel" src="bomb.glb"></a-asset-item>
+</a-assets>
 <a-camera gps-camera rotation-reader></a-camera>
 </a-scene>
 
@@ -81,8 +98,7 @@ const bombs = [
 let bombEntities = [];
 let showHints = true;
 
-// ===== ミニマップ設定（重要） =====
-// マップ画像の範囲に合わせて調整
+// ===== ミニマップ範囲 =====
 const mapMinLat = 35.73947;
 const mapMaxLat = 35.74008;
 const mapMinLng = 139.53774;
@@ -100,21 +116,21 @@ document.getElementById("toggleHint").onclick = () => {
 
 // ===== 座標変換 =====
 function convert(lat, lng) {
-  const x = (lng - mapMinLng) / (mapMaxLng - mapMinLng) * 200;
-  const y = (mapMaxLat - lat) / (mapMaxLat - mapMinLat) * 200;
+  const x = (lng - mapMinLng) / (mapMaxLng - mapMinLng) * canvas.width;
+  const y = (mapMaxLat - lat) / (mapMaxLat - mapMinLat) * canvas.height;
   return { x, y };
 }
 
 // ===== ミニマップ描画 =====
 function drawMap(userLat, userLng) {
 
-  ctx.clearRect(0, 0, 200, 200);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 自分（青）
+  // 自分
   const me = convert(userLat, userLng);
   ctx.fillStyle = "blue";
   ctx.beginPath();
-  ctx.arc(me.x, me.y, 5, 0, Math.PI * 2);
+  ctx.arc(me.x, me.y, 6, 0, Math.PI * 2);
   ctx.fill();
 
   if (!showHints) return;
@@ -124,7 +140,7 @@ function drawMap(userLat, userLng) {
     const pos = convert(b.lat, b.lng);
     ctx.fillStyle = bombs[i].found ? "gray" : "yellow";
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
     ctx.fill();
   });
 }
@@ -134,19 +150,32 @@ window.onload = () => {
   const scene = document.querySelector("a-scene");
 
   bombs.forEach((b, i) => {
-    const el = document.createElement("a-box");
+    const el = document.createElement("a-entity");
 
     el.setAttribute("gps-entity-place", `latitude:${b.lat}; longitude:${b.lng}`);
-    el.setAttribute("color", "red");
-    el.setAttribute("scale", "10 10 10");
+    el.setAttribute("gltf-model", "#bombModel");
+    el.setAttribute("scale", "3 3 3");
     el.setAttribute("visible", "false");
 
-    el.addEventListener("click", () => {
-      if (!bombs[i].found) {
-        bombs[i].found = true;
-        el.removeAttribute("animation");
+    const hitbox = document.createElement("a-box");
+
+hitbox.setAttribute("scale", "20 20 20");
+hitbox.setAttribute("material", "opacity:0; transparent:true");
+
+hitbox.addEventListener("click", () => {
+  if (!bombs[i].found) {
+    bombs[i].found = true;
+
+    el.setAttribute("scale", "16 16 16");
+    el.removeAttribute("animation");
+
+    const ui = document.getElementById("foundUI");
+    ui.style.display = "block";
+    setTimeout(() => ui.style.display = "none", 1500);
       }
     });
+
+    el.appendChild(hitbox);
 
     scene.appendChild(el);
     bombEntities.push(el);
@@ -189,10 +218,8 @@ function startGPS() {
     });
 
     // 距離表示
-    const ui = document.getElementById("distanceUI");
-    ui.innerText = (nearestDist === Infinity)
-      ? "クリア！"
-      : "あと " + Math.floor(nearestDist) + " m";
+    document.getElementById("distanceUI").innerText =
+      (nearestDist === Infinity) ? "クリア！" : "あと " + Math.floor(nearestDist) + " m";
 
     // ミニマップ更新
     drawMap(userLat, userLng);
@@ -200,7 +227,7 @@ function startGPS() {
   });
 }
 
-// ===== 距離 =====
+// ===== 距離計算 =====
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
