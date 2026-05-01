@@ -37,28 +37,28 @@ z-index:20;">
 </div>
 
 <!-- ミニマップ -->
-<img src="map.png" style="
+<img id="mapImg" src="map.png" style="
 position:absolute;
 top:20px;
-right:20px;
+left:20px;
 width:200px;
-height:200px;
+height:306px;
 z-index:5;
 ">
 
-<canvas id="mapCanvas" width="200" height="200" style="
+<canvas id="mapCanvas" width="200" height="306" style="
 position:absolute;
 top:20px;
-right:20px;
+left:20px;
 z-index:10;
 "></canvas>
 
-<button id="toggleHint" style="
+<button id="toggleMap" style="
 position:absolute;
 top:340px;
-right:20px;
+left:20px;
 z-index:20;">
-ヒントON
+マップON
 </button>
 
 <a-scene
@@ -69,6 +69,7 @@ arjs="sourceType:webcam; facingMode:environment;"
 <a-assets>
   <a-asset-item id="bombModel" src="bomb.glb"></a-asset-item>
 </a-assets>
+
 <a-camera gps-camera rotation-reader></a-camera>
 </a-scene>
 
@@ -96,7 +97,7 @@ const bombs = [
 ];
 
 let bombEntities = [];
-let showHints = true;
+let showMap = true;
 
 // ===== ミニマップ範囲 =====
 const mapMinLat = 35.73947;
@@ -107,11 +108,15 @@ const mapMaxLng = 139.53871;
 const canvas = document.getElementById("mapCanvas");
 const ctx = canvas.getContext("2d");
 
-// ===== ヒント切替 =====
-document.getElementById("toggleHint").onclick = () => {
-  showHints = !showHints;
-  document.getElementById("toggleHint").innerText =
-    showHints ? "ヒントON" : "ヒントOFF";
+// ===== マップON/OFF =====
+document.getElementById("toggleMap").onclick = () => {
+  showMap = !showMap;
+
+  document.getElementById("mapCanvas").style.display = showMap ? "block" : "none";
+  document.getElementById("mapImg").style.display = showMap ? "block" : "none";
+
+  document.getElementById("toggleMap").innerText =
+    showMap ? "マップON" : "マップOFF";
 };
 
 // ===== 座標変換 =====
@@ -124,32 +129,25 @@ function convert(lat, lng) {
 // ===== ミニマップ描画 =====
 function drawMap(userLat, userLng) {
 
+  if (!showMap) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 自分
   const me = convert(userLat, userLng);
+
   ctx.fillStyle = "blue";
   ctx.beginPath();
   ctx.arc(me.x, me.y, 6, 0, Math.PI * 2);
   ctx.fill();
-
-  if (!showHints) return;
-
-  // 爆弾
-  bombs.forEach((b, i) => {
-    const pos = convert(b.lat, b.lng);
-    ctx.fillStyle = bombs[i].found ? "gray" : "yellow";
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
-    ctx.fill();
-  });
 }
 
 // ===== 初期化 =====
 window.onload = () => {
+
   const scene = document.querySelector("a-scene");
 
   bombs.forEach((b, i) => {
+
     const el = document.createElement("a-entity");
 
     el.setAttribute("gps-entity-place", `latitude:${b.lat}; longitude:${b.lng}`);
@@ -157,21 +155,26 @@ window.onload = () => {
     el.setAttribute("scale", "3 3 3");
     el.setAttribute("visible", "false");
 
+    // 当たり判定
     const hitbox = document.createElement("a-box");
 
-hitbox.setAttribute("scale", "20 20 20");
-hitbox.setAttribute("material", "opacity:0; transparent:true");
+    hitbox.setAttribute("scale", "20 20 20");
+    hitbox.setAttribute("material", "opacity:0; transparent:true");
 
-hitbox.addEventListener("click", () => {
-  if (!bombs[i].found) {
-    bombs[i].found = true;
+    hitbox.addEventListener("click", () => {
+      if (!bombs[i].found) {
 
-    el.setAttribute("scale", "16 16 16");
-    el.removeAttribute("animation");
+        bombs[i].found = true;
 
-    const ui = document.getElementById("foundUI");
-    ui.style.display = "block";
-    setTimeout(() => ui.style.display = "none", 1500);
+        el.setAttribute("scale", "5 5 5");
+        el.removeAttribute("animation");
+
+        const ui = document.getElementById("foundUI");
+        ui.style.display = "block";
+
+        setTimeout(() => {
+          ui.style.display = "none";
+        }, 1500);
       }
     });
 
@@ -194,6 +197,7 @@ function startGPS() {
     let nearestDist = Infinity;
 
     bombs.forEach((b, i) => {
+
       const dist = getDistance(userLat, userLng, b.lat, b.lng);
       const el = bombEntities[i];
 
@@ -202,24 +206,29 @@ function startGPS() {
       }
 
       if (dist < 20) {
+
         el.setAttribute("visible", true);
 
         if (!bombs[i].found) {
           el.setAttribute("animation", {
-            property: "visible",
+            property: "scale",
             dir: "alternate",
             dur: 500,
-            loop: true
+            loop: true,
+            to: "4 4 4"
           });
         }
+
       } else {
         el.setAttribute("visible", false);
       }
     });
 
-    // 距離表示
+    // 距離UI
     document.getElementById("distanceUI").innerText =
-      (nearestDist === Infinity) ? "クリア！" : "あと " + Math.floor(nearestDist) + " m";
+      (nearestDist === Infinity)
+        ? "クリア！"
+        : "あと " + Math.floor(nearestDist) + " m";
 
     // ミニマップ更新
     drawMap(userLat, userLng);
@@ -229,7 +238,9 @@ function startGPS() {
 
 // ===== 距離計算 =====
 function getDistance(lat1, lon1, lat2, lon2) {
+
   const R = 6371000;
+
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
 
