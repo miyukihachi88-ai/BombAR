@@ -220,42 +220,42 @@ window.onload = () => {
     el.setAttribute("visible", "false");
 
     // 当たり判定
-    const hitbox = document.createElement("a-box");
+    const hitbox = document.createElement("a-sphere");
 
-    hitbox.setAttribute("scale", "20 20 20");
-    hitbox.setAttribute("position", "0 0 -2");
+    hitbox.setAttribute("radius", "3");
+    hitbox.setAttribute("position", "0 0 0");
     hitbox.setAttribute("material", "opacity:0.01; transparent:true");
 
-    el.classList.add("clickable");
+    // クリック対象
     hitbox.classList.add("clickable");
 
     hitbox.addEventListener("click", () => {
-  if (!bombs[i].found) {
+      if (!bombs[i].found) {
 
-    bombs[i].found = true;
+        bombs[i].found = true;
 
-    el.setAttribute("scale", "5 5 5");
-    el.removeAttribute("animation");
+        el.setAttribute("scale", "5 5 5");
+        el.removeAttribute("animation");
 
-    ring.setAttribute("visible", "false");
+        el.ring.setAttribute("visible", "false");
 
-    const ui = document.getElementById("foundUI");
+        const ui = document.getElementById("foundUI");
 
-    const remaining = getRemainingCount();
+        const remaining = getRemainingCount();
 
-    if (remaining === 0) {
-      ui.innerText = "🎉 クリア！！";
-    } else {
-      ui.innerText = `発見！ あと ${remaining} 個`;
-    }
+        if (remaining === 0) {
+          ui.innerText = "🎉 クリア！！";
+        } else {
+          ui.innerText = `発見！ あと ${remaining} 個`;
+        }
 
-    ui.style.display = "block";
+        ui.style.display = "block";
 
-    setTimeout(() => {
-      ui.style.display = "none";
-    }, 1500);
-  }
-});
+        setTimeout(() => {
+          ui.style.display = "none";
+        }, 1500);
+      }
+    });
 
     el.appendChild(hitbox);
 
