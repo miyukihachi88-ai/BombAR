@@ -72,7 +72,10 @@ arjs="sourceType:webcam; facingMode:environment;"
   <a-asset-item id="bombModel" src="Bomb.glb"></a-asset-item>
 </a-assets>
 
-<a-camera gps-camera rotation-reader></a-camera>
+<a-camera gps-camera rotation-reader
+  raycaster="objects: .clickable"
+  cursor="fuse: false; rayOrigin: mouse">
+</a-camera>
 </a-scene>
 
 <script>
@@ -134,11 +137,17 @@ document.getElementById("toggleMap").onclick = () => {
 // ===== 座標変換 =====
 function convert(lat, lng, userLat, userLng) {
 
-  const dx = (lng - userLng) / (mapMaxLng - mapMinLng);
-  const dy = (lat - userLat) / (mapMaxLat - mapMinLat);
+  // 表示範囲をズームで変える
+  const latRange = (mapMaxLat - mapMinLat) / zoom;
+  const lngRange = (mapMaxLng - mapMinLng) / zoom;
 
-  const x = canvas.width / 2 + dx * canvas.width * zoom;
-  const y = canvas.height / 2 - dy * canvas.height * zoom;
+  const minLat = userLat - latRange / 2;
+  const maxLat = userLat + latRange / 2;
+  const minLng = userLng - lngRange / 2;
+  const maxLng = userLng + lngRange / 2;
+
+  const x = (lng - minLng) / (maxLng - minLng) * canvas.width;
+  const y = (maxLat - lat) / (maxLat - minLat) * canvas.height;
 
   return { x, y };
 }
@@ -150,22 +159,13 @@ function drawMap(userLat, userLng) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 自分は中央固定
+  // 自分は中央固定じゃなくてもOK（自然になる）
+  const me = convert(userLat, userLng, userLat, userLng);
+
   ctx.fillStyle = "blue";
   ctx.beginPath();
   ctx.arc(canvas.width/2, canvas.height/2, 6, 0, Math.PI * 2);
   ctx.fill();
-
-  // 爆弾（表示したいなら）
-  bombs.forEach((b, i) => {
-
-    const pos = convert(b.lat, b.lng, userLat, userLng);
-
-    ctx.fillStyle = "red";
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-    ctx.fill();
-  });
 }
 
 let initialDistance = null;
@@ -187,7 +187,7 @@ canvas.addEventListener("touchmove", (e) => {
       zoom *= scaleChange;
 
       // 制限
-      zoom = Math.max(0.5, Math.min(zoom, 5));
+      zoom = Math.max(0.5, Math.min(zoom, 10));
 
       initialDistance = newDistance;
     }
@@ -210,31 +210,34 @@ window.onload = () => {
 
     el.setAttribute("gps-entity-place", `latitude:${b.lat}; longitude:${b.lng}`);
     el.setAttribute("gltf-model", "#bombModel");
-    el.setAttribute("scale", "3 3 3");
+    el.setAttribute("scale", "4 4 4");
     el.setAttribute("visible", "false");
 
     // 当たり判定
     const hitbox = document.createElement("a-box");
 
     hitbox.setAttribute("scale", "20 20 20");
-    hitbox.setAttribute("material", "opacity:0; transparent:true");
+    hitbox.setAttribute("position", "0 0 -2");
+    hitbox.setAttribute("material", "opacity:0.01; transparent:true");
 
-    hitbox.addEventListener("click", () => {
-      if (!bombs[i].found) {
+    el.classList.add("clickable");
+    hitbox.classList.add("clickable");
 
-        bombs[i].found = true;
+    el.addEventListener("click", () => {
+    if (!bombs[i].found) {
+      bombs[i].found = true;
 
-        el.setAttribute("scale", "5 5 5");
-        el.removeAttribute("animation");
+      el.setAttribute("scale", "5 5 5");
+      el.removeAttribute("animation");
 
-        const ui = document.getElementById("foundUI");
-        ui.style.display = "block";
+      const ui = document.getElementById("foundUI");
+      ui.style.display = "block";
 
-        setTimeout(() => {
-          ui.style.display = "none";
-        }, 1500);
-      }
-    });
+      setTimeout(() => {
+        ui.style.display = "none";
+      }, 1500);
+    }
+  });
 
     el.appendChild(hitbox);
 
