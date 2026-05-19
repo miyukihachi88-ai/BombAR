@@ -101,6 +101,15 @@ const bombs = [
 let bombEntities = [];
 let showMap = false;
 let mapScale = 1;
+let zoom = 1;
+
+let smoothedLat = null;
+let smoothedLng = null;
+
+function smooth(current, last) {
+  if (last === null) return current;
+  return last + (current - last) * 0.1;
+}
 
 // ===== ミニマップ範囲 =====
 const mapMinLat = 35.73947;
@@ -123,9 +132,14 @@ document.getElementById("toggleMap").onclick = () => {
 };
 
 // ===== 座標変換 =====
-function convert(lat, lng) {
-  const x = (lng - mapMinLng) / (mapMaxLng - mapMinLng) * canvas.width;
-  const y = (mapMaxLat - lat) / (mapMaxLat - mapMinLat) * canvas.height;
+function convert(lat, lng, userLat, userLng) {
+
+  const dx = (lng - userLng) / (mapMaxLng - mapMinLng);
+  const dy = (lat - userLat) / (mapMaxLat - mapMinLat);
+
+  const x = canvas.width / 2 + dx * canvas.width * zoom;
+  const y = canvas.height / 2 - dy * canvas.height * zoom;
+
   return { x, y };
 }
 
@@ -136,12 +150,22 @@ function drawMap(userLat, userLng) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const me = convert(userLat, userLng);
-
+  // 自分は中央固定
   ctx.fillStyle = "blue";
   ctx.beginPath();
-  ctx.arc(me.x, me.y, 6, 0, Math.PI * 2);
+  ctx.arc(canvas.width/2, canvas.height/2, 6, 0, Math.PI * 2);
   ctx.fill();
+
+  // 爆弾（表示したいなら）
+  bombs.forEach((b, i) => {
+
+    const pos = convert(b.lat, b.lng, userLat, userLng);
+
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
 }
 
 let initialDistance = null;
@@ -160,16 +184,10 @@ canvas.addEventListener("touchmove", (e) => {
     if (initialDistance) {
       const scaleChange = newDistance / initialDistance;
 
-      mapScale *= scaleChange;
+      zoom *= scaleChange;
 
-      // 制限（暴走防止）
-      mapScale = Math.max(0.5, Math.min(mapScale, 3));
-
-      document.getElementById("mapCanvas").style.transform =
-        `scale(${mapScale})`;
-
-      document.getElementById("mapImg").style.transform =
-        `scale(${mapScale})`;
+      // 制限
+      zoom = Math.max(0.5, Math.min(zoom, 5));
 
       initialDistance = newDistance;
     }
@@ -231,9 +249,14 @@ window.onload = () => {
 function startGPS() {
   navigator.geolocation.watchPosition((pos) => {
 
-    const userLat = pos.coords.latitude;
-    const userLng = pos.coords.longitude;
+    const rawLat = pos.coords.latitude;
+    const rawLng = pos.coords.longitude;
 
+    smoothedLat = smooth(rawLat, smoothedLat);
+    smoothedLng = smooth(rawLng, smoothedLng);
+
+    const userLat = smoothedLat;
+    const userLng = smoothedLng;
     let nearestDist = Infinity;
 
     bombs.forEach((b, i) => {
@@ -248,6 +271,18 @@ function startGPS() {
       if (dist < 20) {
 
         el.setAttribute("visible", true);
+        // ⭐ リング追加
+        const ring = document.createElement("a-ring");
+
+        ring.setAttribute("radius-inner", "2");
+        ring.setAttribute("radius-outer", "3");
+        ring.setAttribute("rotation", "-90 0 0");
+        ring.setAttribute("position", "0 0 0");
+
+        // 光る設定
+        ring.setAttribute("material", "color: yellow; emissive: yellow; emissiveIntensity: 2");
+
+        el.appendChild(ring);
 
         if (!bombs[i].found) {
           el.setAttribute("animation", {
