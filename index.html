@@ -60,7 +60,7 @@ position:absolute;
 top:340px;
 left:20px;
 z-index:20;">
-マップON
+マップOFF
 </button>
 
 <a-scene
@@ -69,7 +69,7 @@ embedded
 arjs="sourceType:webcam; facingMode:environment;"
 >
 <a-assets>
-  <a-asset-item id="bombModel" src="bomb.glb"></a-asset-item>
+  <a-asset-item id="bombModel" src="Bomb.glb"></a-asset-item>
 </a-assets>
 
 <a-camera gps-camera rotation-reader></a-camera>
@@ -79,7 +79,7 @@ arjs="sourceType:webcam; facingMode:environment;"
 
 // ===== 爆弾データ =====
 const bombs = [
-  { lat: 35.736582, lng: 139.537972, found: false },
+  { lat: 35.7272323, lng: 139.5414221, found: false },
   { lat: 35.736937, lng: 139.537907, found: false },
   { lat: 35.737052, lng: 139.537947, found: false },
   { lat: 35.737248, lng: 139.537907, found: false },
@@ -196,7 +196,7 @@ window.onload = () => {
     el.setAttribute("visible", "false");
 
     // 当たり判定
-    const hitbox = document.createElement("a-entity");
+    const hitbox = document.createElement("a-box");
 
     hitbox.setAttribute("scale", "20 20 20");
     hitbox.setAttribute("material", "opacity:0; transparent:true");
