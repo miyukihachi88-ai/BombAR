@@ -28,7 +28,7 @@ left:50%;
 transform:translate(-50%, -50%);
 background:rgba(255,0,0,0.9);
 color:white;
-padding:20px 40px;
+padding:40px 30px;
 border-radius:20px;
 font-size:40px;
 font-weight:bold;
@@ -76,7 +76,22 @@ z-index:20;">
 // ===== データ =====
 const bombs = [
   { lat: 35.7272323, lng: 139.5414221, found: false },
-  { lat: 35.736937, lng: 139.537907, found: false }
+  { lat: 35.736937, lng: 139.537907, found: false },
+  { lat: 35.737052, lng: 139.537947, found: false },
+  { lat: 35.737248, lng: 139.537907, found: false },
+  { lat: 35.737478, lng: 139.53808, found: false },
+  { lat: 35.737703, lng: 139.5381, found: false },
+  { lat: 35.737934, lng: 139.538061, found: false },
+  { lat: 35.738154, lng: 139.538183, found: false },
+  { lat: 35.738561, lng: 139.538271, found: false },
+  { lat: 35.738789, lng: 139.538292, found: false },
+  { lat: 35.739154, lng: 139.538353, found: false },
+  { lat: 35.739586, lng: 139.538666, found: false },
+  { lat: 35.739867, lng: 139.538581, found: false },
+  { lat: 35.740057, lng: 139.538597, found: false },
+  { lat: 35.740265, lng: 139.538585, found: false },
+  { lat: 35.74047, lng: 139.538701, found: false },
+  { lat: 35.740801, lng: 139.538547, found: false }
 ];
 
 let bombEntities = [];
@@ -185,7 +200,6 @@ function startGPS(){
 
       if(dist<20){
         el.setAttribute("visible",true);
-        if(el.ring) el.ring.setAttribute("visible",true);
 
         if(!b.found){
           el.setAttribute("animation",{
@@ -202,7 +216,7 @@ function startGPS(){
         if(el.ring) el.ring.setAttribute("visible",false);
       }
 
-    }); // ← ★これがエラー原因だったやつ
+    }); 
 
     distanceUI.innerText =
       nearestDist===Infinity ? "クリア！" : "あと "+Math.floor(nearestDist)+" m";
