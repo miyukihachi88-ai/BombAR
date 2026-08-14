@@ -65,8 +65,7 @@ function initializeUI(){
         showMap = !showMap;
         mapCanvas.style.display =
             showMap ? "block" : "none";
-        mapImg.style.display =
-            showMap ? "block" : "none";
+        mapImg.style.display = "none";
         toggleMap.innerText =
             showMap ? "MAP OFF" : "MAP ON";
     };
@@ -289,6 +288,8 @@ const mapMaxLng = 139.5420;
 // ミニマップ描画
 //========================================
 function drawMiniMap(){
+    mapCanvas.width = 200;
+    mapCanvas.height = 306;
     ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
     //----------------------------------
     // 地図画像
