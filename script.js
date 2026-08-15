@@ -280,14 +280,16 @@ function getDistance(lat1, lng1, lat2, lng2) {
 //========================================
 // ミニマップ設定
 //========================================
-const mapMinLat = 35.7273;
-const mapMaxLat = 35.7413;
-const mapMinLng = 139.5367;
-const mapMaxLng = 139.5417;
+const mapMinLat = 35.7275;
+const mapMaxLat = 35.7415;
+const mapMinLng = 139.5362;
+const mapMaxLng = 139.5412;
 //========================================
 // ミニマップ描画
 //========================================
 function drawMiniMap(){
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     mapCanvas.width = 200;
     mapCanvas.height = 306;
     ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
