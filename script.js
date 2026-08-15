@@ -2,7 +2,7 @@
 // 爆弾データ
 //========================================
 const bombs = [
-    { lat: 35.7272323, lng: 139.5414221, found: false },
+    { lat: 35.736582, lng: 139.537972, found: false },
     { lat: 35.7369370, lng: 139.5379070, found: false },
     { lat: 35.7370520, lng: 139.5379470, found: false },
     { lat: 35.7372480, lng: 139.5379070, found: false },
@@ -280,10 +280,10 @@ function getDistance(lat1, lng1, lat2, lng2) {
 //========================================
 // ミニマップ設定
 //========================================
-const mapMinLat = 35.7270;
-const mapMaxLat = 35.7410;
-const mapMinLng = 139.5370;
-const mapMaxLng = 139.5420;
+const mapMinLat = 35.7273;
+const mapMaxLat = 35.7413;
+const mapMinLng = 139.5367;
+const mapMaxLng = 139.5417;
 //========================================
 // ミニマップ描画
 //========================================
