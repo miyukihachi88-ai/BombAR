@@ -43,8 +43,8 @@ body{
     position:absolute;
     top:20px;
     left:20px;
-    width:300px;
-    height:460px;
+    width:240px;
+    height:368px;
     display:none;
     object-fit:contain;
     z-index:5;
