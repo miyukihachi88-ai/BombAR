@@ -291,8 +291,8 @@ const mapMaxLng = 139.53958571726383;
 function drawMiniMap(){
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    mapCanvas.width = 320;
-    mapCanvas.height = 491;
+    mapCanvas.width = 300;
+    mapCanvas.height = 460;
     ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
     //----------------------------------
     // 地図画像
