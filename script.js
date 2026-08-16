@@ -292,7 +292,7 @@ function drawMiniMap(){
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     mapCanvas.width = 300;
-    mapCanvas.height = 460.5;
+    mapCanvas.height = 461;
     ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
     //----------------------------------
     // 地図画像
