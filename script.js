@@ -2,7 +2,7 @@
 // 爆弾データ
 //========================================
 const bombs = [
-    { lat: 35.727250, lng: 139.541746, found: false },
+    { lat: 35.727243, lng:139.541411, found: false },
     { lat: 35.7369370, lng: 139.5379070, found: false },
     { lat: 35.7370520, lng: 139.5379470, found: false },
     { lat: 35.7372480, lng: 139.5379070, found: false },
