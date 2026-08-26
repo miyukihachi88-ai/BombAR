@@ -88,7 +88,7 @@ function createBombs(){
         );
         bombEntity.setAttribute(
             "scale",
-            " 2 2 2"
+            " 1 1 1"
         );
         bombEntity.setAttribute(
             "visible",
