@@ -43,7 +43,7 @@ function smooth(current, previous){
     if(previous === null){
         return current;
     }
-    return previous + (current - previous) * 0.1;
+    return previous + (current - previous) * 0.03;
 }
 //========================================
 // 初期化
@@ -79,42 +79,20 @@ function createBombs(){
         const bombEntity =
             document.createElement("a-entity");
         bombEntity.setAttribute(
-            "gps-entity-place",
-            `latitude:${bomb.lat}; longitude:${bomb.lng}`
-        );
-        bombEntity.setAttribute(
-            "gltf-model",
-            "#bombModel"
-        );
-        bombEntity.setAttribute(
-            "scale",
-            " 1 1 1"
-        );
-        bombEntity.setAttribute(
-            "visible",
-            "false"
-        );
+            "gps-new-entity-place",
+            `latitude:${bomb.lat}; longitude:${bomb.lng}`);
+        bombEntity.setAttribute("gltf-model","#bombModel");
+        bombEntity.setAttribute("scale"," 1 1 1");
+        bombEntity.setAttribute("visible","false");
         //----------------------------
         // 光るリング
         //----------------------------
         const ring =
             document.createElement("a-ring");
-        ring.setAttribute(
-            "radius-inner",
-            "2"
-        );
-        ring.setAttribute(
-            "radius-outer",
-            "3"
-        );
-        ring.setAttribute(
-            "rotation",
-            "-90 0 0"
-        );
-        ring.setAttribute(
-            "material",
-            "color:yellow; emissive:yellow; emissiveIntensity:3"
-        );
+        ring.setAttribute("radius-inner","2");
+        ring.setAttribute("radius-outer","3");
+        ring.setAttribute("rotation","-90 0 0");
+        ring.setAttribute("material","color:yellow; emissive:yellow; emissiveIntensity:3");
         bombEntity.appendChild(ring);
         bombEntity.ring = ring;
         //----------------------------
@@ -129,6 +107,7 @@ function createBombs(){
 //========================================
 function startGPS() {
     navigator.geolocation.watchPosition(
+        
         updateGPS,
         (error) => {
             alert("GPSが取得できません");
@@ -144,7 +123,16 @@ function startGPS() {
 //========================================
 // GPS更新
 //========================================
+let lastUpdate = 0;
 function updateGPS(position) {
+    if(position.coords.accuracy > 10){
+        return;
+        }
+    if(Date.now()-lastUpdate<1000){
+        return;
+    }
+
+    lastUpdate = Date.now();
     smoothedLat = smooth(position.coords.latitude, smoothedLat);
     smoothedLng = smooth(position.coords.longitude, smoothedLng);
     let nearestDistance = Infinity;
@@ -163,23 +151,14 @@ function updateGPS(position) {
         // 10m以内で表示
         //--------------------------
         if (distance <= 10) {
-            bombEntity.setAttribute("visible", true);
-            if (!bomb.found) {
-                bombEntity.ring.setAttribute("visible", true);
-                bombEntity.setAttribute("animation", {
-                    property: "scale",
-                    dir: "alternate",
-                    dur: 600,
-                    loop: true,
-                    to: "9 9 9"
-                });
-            }
-        }
-        else {
-            bombEntity.setAttribute("visible", false);
-            bombEntity.ring.setAttribute("visible", false);
-            bombEntity.removeAttribute("animation");
-        }
+        bombEntity.setAttribute("visible", true);
+        // 未発見ならリングを表示
+        bombEntity.ring.setAttribute("visible", !bomb.found);
+
+    } else if(distance > 15){
+        bombEntity.setAttribute("visible", false);
+        bombEntity.ring.setAttribute("visible", false);
+    }
     });
     //--------------------------
     // 距離表示
@@ -211,7 +190,7 @@ function handleFound(index) {
     //--------------------------
     bombEntity.ring.setAttribute("visible", false);
     bombEntity.removeAttribute("animation");
-    bombEntity.setAttribute("scale", "8 8 8");
+    bombEntity.setAttribute("scale", "1 1 1");
     //--------------------------
     // 残り個数
     //--------------------------

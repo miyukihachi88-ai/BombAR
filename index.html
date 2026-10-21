@@ -4,6 +4,9 @@
 <head>
     <meta charset="utf-8">
 
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     <link rel="stylesheet" href="style.css">
 
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -15,7 +18,7 @@
 <div id="distanceUI">距離取得中...</div>
 <div id="foundUI">発見！</div>
 
-<img id="mapImg" src="map_400x614_high_quality.png">
+<img id="mapImg" src="map.png">
 
 <canvas id="mapCanvas"
         width="600"
@@ -39,7 +42,7 @@
     </a-assets>
 
     <a-camera
-        gps-camera
+        gps-new-camera="gpsMinDistance: 2; gpsTimeInterval: 1000;"
         rotation-reader>
     </a-camera>
 
