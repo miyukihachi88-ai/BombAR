@@ -268,6 +268,9 @@ const mapMaxLng = 139.53958571726383;
 // ミニマップ描画
 //========================================
 function drawMiniMap(){
+    if (!mapImg.complete || mapImg.naturalWidth === 0) {
+            return;
+        }
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     mapCanvas.width = 220;
