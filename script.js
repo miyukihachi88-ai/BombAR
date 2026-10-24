@@ -56,19 +56,34 @@ window.onload = () => {
 //========================================
 // UI初期設定
 //========================================
-function initializeUI(){
-    // 最初は非表示
+function initializeUI() {
+
     mapCanvas.style.display = "none";
     mapImg.style.display = "none";
     toggleMap.innerText = "MAP ON";
+
     toggleMap.onclick = () => {
+
         showMap = !showMap;
-        mapCanvas.style.display =
-            showMap ? "block" : "none";
-        mapImg.style.display = "none";
-        toggleMap.innerText =
-            showMap ? "MAP OFF" : "MAP ON";
+
+        mapCanvas.style.display = showMap ? "block" : "none";
+        toggleMap.innerText = showMap ? "MAP OFF" : "MAP ON";
+
+        if (showMap) {
+            drawMiniMap();
+        }
     };
+
+    // 地図画像の読み込みが完了したら再描画
+    mapImg.addEventListener("load", () => {
+        if (showMap) {
+            drawMiniMap();
+        }
+    });
+
+    mapImg.addEventListener("error", () => {
+        alert("地図画像の読み込みに失敗しました。map.pngを確認してください。");
+    });
 }
 //========================================
 // 爆弾生成
