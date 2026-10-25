@@ -180,9 +180,7 @@ function updateGPS(position) {
 
     bombEntity.setAttribute("visible", false);
     bombEntity.ring.setAttribute("visible", false);
-
 }
-    }
     });
     //--------------------------
     // 距離表示
@@ -200,6 +198,7 @@ function updateGPS(position) {
     if (showMap) {
         drawMiniMap();
     }
+}
 
 //========================================
 // 爆弾発見
