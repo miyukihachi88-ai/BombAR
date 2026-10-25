@@ -165,12 +165,19 @@ function updateGPS(position) {
         //--------------------------
         // 10m以内で表示
         //--------------------------
-        if (distance <= 10) {
-        bombEntity.setAttribute("visible", true);
-        bombEntity.ring.setAttribute("visible", !bomb.found);
-    }else if(distance > 15){
-        bombEntity.setAttribute("visible", false);
-        bombEntity.ring.setAttribute("visible", false);
+        if (distance <= 20) {
+
+    bombEntity.setAttribute("visible", true);
+    bombEntity.ring.setAttribute("visible", !bomb.found);
+
+    keepBombAtMinimumDistance(bombEntity, 5);
+
+} else if (distance > 25) {
+
+    bombEntity.setAttribute("visible", false);
+    bombEntity.ring.setAttribute("visible", false);
+
+}
     }
     });
     //--------------------------
@@ -245,7 +252,7 @@ document.addEventListener("click", () => {
             nearestIndex = index;
         }
     });
-    if (nearestDistance <= 10) {
+    if (nearestDistance <= 20) {
         handleFound(nearestIndex);
     }
 });
@@ -358,6 +365,38 @@ function drawPlayer(){
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.restore();
+}
+function keepBombAtMinimumDistance(bombEntity, minDistance = 5) {
+
+    const camera = document.querySelector("a-camera");
+
+    if (!camera) return;
+
+    const cameraPos = new THREE.Vector3();
+    const bombPos = new THREE.Vector3();
+
+    camera.object3D.getWorldPosition(cameraPos);
+    bombEntity.object3D.getWorldPosition(bombPos);
+
+    const direction = bombPos.clone().sub(cameraPos);
+    const distance = direction.length();
+
+    if (distance < 0.01 || distance >= minDistance) return;
+
+    direction.normalize();
+
+    const targetWorldPos = cameraPos.clone().add(
+        direction.multiplyScalar(minDistance)
+    );
+
+    const parent = bombEntity.object3D.parent;
+
+    if (!parent) return;
+
+    parent.updateMatrixWorld(true);
+    bombEntity.object3D.position.copy(
+        parent.worldToLocal(targetWorldPos)
+    );
 }
 //========================================
 // 方位取得
