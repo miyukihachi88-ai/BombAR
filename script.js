@@ -96,21 +96,9 @@ function createBombs(){
         bombEntity.setAttribute(
             "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
-        // テスト用の赤い箱
-bombEntity.setAttribute("geometry", {
-    primitive: "box",
-    width: 2,
-    height: 2,
-    depth: 2
-});
-
-bombEntity.setAttribute("material", {
-    color: "red",
-    opacity: 0.9
-});
-
-bombEntity.setAttribute("scale", "1 1 1");
-bombEntity.setAttribute("visible", "false");
+        bombEntity.setAttribute("gltf-model", "#bombModel");
+        bombEntity.setAttribute("scale", "2 2 2");
+        bombEntity.setAttribute("visible", "false");
         //----------------------------
         // 光るリング
         //----------------------------
