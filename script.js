@@ -97,7 +97,7 @@ function createBombs(){
             "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
         bombEntity.setAttribute("gltf-model", "#bombModel");
-        bombEntity.setAttribute("scale", "3 3 3");
+        bombEntity.setAttribute("scale", "2 2 2");
         bombEntity.setAttribute("visible", "false");
         //----------------------------
         // 光るリング
@@ -141,9 +141,6 @@ function startGPS() {
 let lastUpdate = 0;
 function updateGPS(position) {
 
-    const accuracy = position.coords.accuracy;
-
-    // 最初の位置情報は精度が多少悪くても利用する
     if (smoothedLat !== null && accuracy > 20) {
         return;
     }
@@ -215,7 +212,7 @@ function handleFound(index) {
     //--------------------------
     bombEntity.ring.setAttribute("visible", false);
     bombEntity.removeAttribute("animation");
-    bombEntity.setAttribute("scale", "3 3 3");
+    bombEntity.setAttribute("scale", "2 2 2");
     //--------------------------
     // 残り個数
     //--------------------------
