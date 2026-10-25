@@ -97,7 +97,7 @@ function createBombs(){
             "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
         bombEntity.setAttribute("gltf-model","#bombModel");
-        bombEntity.setAttribute("scale"," 4 4 4");
+        bombEntity.setAttribute("scale"," 2 2 2");
         bombEntity.setAttribute("visible","false");
         //----------------------------
         // 光るリング
@@ -166,10 +166,8 @@ function updateGPS(position) {
         // 10m以内で表示
         //--------------------------
         if (distance <= 10) {
-        bombEntity.setAttribute("visible", true);
-        // 未発見ならリングを表示
-        bombEntity.ring.setAttribute("visible", !bomb.found);
-
+        bombEntity.setAttribute("visible", false);
+        bombEntity.ring.setAttribute("visible", false);
     } else if(distance > 15){
         bombEntity.setAttribute("visible", false);
         bombEntity.ring.setAttribute("visible", false);
@@ -205,7 +203,7 @@ function handleFound(index) {
     //--------------------------
     bombEntity.ring.setAttribute("visible", false);
     bombEntity.removeAttribute("animation");
-    bombEntity.setAttribute("scale", "4 4 4");
+    bombEntity.setAttribute("scale", "2 2 2");
     //--------------------------
     // 残り個数
     //--------------------------
