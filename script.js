@@ -43,7 +43,7 @@ function smooth(current, previous){
     if(previous === null){
         return current;
     }
-    return previous + (current - previous) * 0.2;
+    return previous + (current - previous) * 0.03;
 }
 //========================================
 // 初期化
@@ -141,7 +141,7 @@ function startGPS() {
 let lastUpdate = 0;
 function updateGPS(position) {
 
-    if (smoothedLat !== null && accuracy > 20) {
+    if (position.coords.accuracy > 10) {
         return;
     }
 
@@ -150,6 +150,7 @@ function updateGPS(position) {
     }
 
     lastUpdate = Date.now();
+
     smoothedLat = smooth(position.coords.latitude, smoothedLat);
     smoothedLng = smooth(position.coords.longitude, smoothedLng);
     let nearestDistance = Infinity;
