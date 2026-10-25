@@ -97,7 +97,7 @@ function createBombs(){
             "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
         bombEntity.setAttribute("gltf-model","#bombModel");
-        bombEntity.setAttribute("scale"," 8 8 8");
+        bombEntity.setAttribute("scale"," 4 4 4");
         bombEntity.setAttribute("visible","false");
         //----------------------------
         // 光るリング
@@ -205,7 +205,7 @@ function handleFound(index) {
     //--------------------------
     bombEntity.ring.setAttribute("visible", false);
     bombEntity.removeAttribute("animation");
-    bombEntity.setAttribute("scale", "8 8 8");
+    bombEntity.setAttribute("scale", "4 4 4");
     //--------------------------
     // 残り個数
     //--------------------------
