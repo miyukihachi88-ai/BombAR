@@ -43,7 +43,7 @@ function smooth(current, previous){
     if(previous === null){
         return current;
     }
-    return previous + (current - previous) * 0.03;
+    return previous + (current - previous) * 0.2;
 }
 //========================================
 // 初期化
@@ -140,10 +140,15 @@ function startGPS() {
 //========================================
 let lastUpdate = 0;
 function updateGPS(position) {
-    if(position.coords.accuracy > 10){
+
+    const accuracy = position.coords.accuracy;
+
+    // 最初の位置情報は精度が多少悪くても利用する
+    if (smoothedLat !== null && accuracy > 20) {
         return;
-        }
-    if(Date.now()-lastUpdate<1000){
+    }
+
+    if (Date.now() - lastUpdate < 1000) {
         return;
     }
 
