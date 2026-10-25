@@ -96,9 +96,21 @@ function createBombs(){
         bombEntity.setAttribute(
             "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
-        bombEntity.setAttribute("gltf-model","#bombModel");
-        bombEntity.setAttribute("scale"," 2 2 2");
-        bombEntity.setAttribute("visible","false");
+        // テスト用の赤い箱
+bombEntity.setAttribute("geometry", {
+    primitive: "box",
+    width: 2,
+    height: 2,
+    depth: 2
+});
+
+bombEntity.setAttribute("material", {
+    color: "red",
+    opacity: 0.9
+});
+
+bombEntity.setAttribute("scale", "1 1 1");
+bombEntity.setAttribute("visible", "false");
         //----------------------------
         // 光るリング
         //----------------------------
@@ -166,9 +178,9 @@ function updateGPS(position) {
         // 10m以内で表示
         //--------------------------
         if (distance <= 10) {
-        bombEntity.setAttribute("visible", false);
-        bombEntity.ring.setAttribute("visible", false);
-    } else if(distance > 15){
+        bombEntity.setAttribute("visible", true);
+        bombEntity.ring.setAttribute("visible", !bomb.found);
+    }else if(distance > 15){
         bombEntity.setAttribute("visible", false);
         bombEntity.ring.setAttribute("visible", false);
     }
