@@ -205,7 +205,7 @@ function handleFound(index) {
     //--------------------------
     bombEntity.ring.setAttribute("visible", false);
     bombEntity.removeAttribute("animation");
-    bombEntity.setAttribute("scale", "1 1 1");
+    bombEntity.setAttribute("scale", "8 8 8");
     //--------------------------
     // 残り個数
     //--------------------------
