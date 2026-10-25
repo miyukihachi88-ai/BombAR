@@ -94,10 +94,10 @@ function createBombs(){
         const bombEntity =
             document.createElement("a-entity");
         bombEntity.setAttribute(
-            "gps-new-entity-place",
+            "gps-entity-place",
             `latitude:${bomb.lat}; longitude:${bomb.lng}`);
         bombEntity.setAttribute("gltf-model","#bombModel");
-        bombEntity.setAttribute("scale"," 1 1 1");
+        bombEntity.setAttribute("scale"," 8 8 8");
         bombEntity.setAttribute("visible","false");
         //----------------------------
         // 光るリング
